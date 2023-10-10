@@ -67,7 +67,7 @@ PythonBase.prototype.constructor = function(model) {
 	                       {'name': 'traceback'},
 	                       {'name': 'collections'},
 	                       {'name': 'uuid'},
-	                       {'name': 'simos.storage', 'alias': 'pyds'},
+	                       {'name': 'simos.storage', 'alias': 'pyds', 'try': true},
 	                       {'name': 'json', 'try': true},
 	                       {'name': 'h5py', 'try': true}];
 	
@@ -558,6 +558,62 @@ PythonBase.prototype.cloneFunc = function(bl) {
 	return cmd.join('\n');
 };
 
+/*----------------------------------------------------------------------------*/
+PythonBase.prototype.fromDictFunc = function(bl) {
+	if (bl == undefined) {
+		bl = 0;
+	}	
+	var cmd = [];
+	cmd.push(this.gbl(bl) + '@classmethod');
+    cmd.push(this.gbl(bl) + 'def from_dict(cls, dic):')
+    cmd.push(this.gbl(bl+1) +   'if not isinstance(dic, dict):');
+    cmd.push(this.gbl(bl+2) +       'raise TypeError(f"Parameter \'dic\' should be a dict, got \'{type(dic)}\'")');
+    cmd.push(this.gbl(bl+1) +   '# assign values to attributes');
+    cmd.push(this.gbl(bl+1) +   'c = cls()');
+    cmd.push(this.gbl(bl+1) +   'for k, v in dic.items():');
+    cmd.push(this.gbl(bl+2) + 		'if hasattr(c, k):');
+    cmd.push(this.gbl(bl+3) + 			'c.__setattr__(k, v)');
+    cmd.push(this.gbl(bl+2) + 		'else:');
+    cmd.push(this.gbl(bl+3) + 			'print(f"WARNING: class does not have an attribute \'{k}\'")');
+    cmd.push(this.gbl(bl+1) + 	'return c');
+
+	return cmd.join('\n');
+}
+
+/*----------------------------------------------------------------------------*/
+PythonBase.prototype.docstrFunc = function(bl) {
+	if (bl == undefined) {
+		bl = 0;
+	}	
+	var cmd = [];
+	cmd.push(this.gbl(bl) + '"""');
+	cmd.push(this.gbl(bl) + 'type : ');
+	cmd.push(this.gbl(bl+1) + this.getType().replace(/:/g, '.'));
+	cmd.push(this.gbl(bl) + 'description : ');
+	cmd.push(this.gbl(bl+1) + this.model.description);
+	cmd.push(this.gbl(bl) );
+	cmd.push(this.gbl(bl) + 'Attributes');
+	cmd.push(this.gbl(bl) + '----------');
+
+	var props = this.getProperties();
+    for (var i = 0; i<props.length; i++) {
+		var prop = props[i];
+		var optFlag = '';
+		if (prop.optional)
+			optFlag = ', optional';
+
+		var dimFlag = '';
+		if (this.isArray(prop))
+			dimFlag = '[' + prop.dim + ']';
+
+		cmd.push(this.gbl(bl) + prop.name + ' : ' + prop.type.replace(/:/g, '.') + dimFlag + optFlag);
+		cmd.push(this.gbl(bl+1) + prop.description );
+	}
+
+	cmd.push(this.gbl(bl) + '"""');
+
+	return cmd.join('\n');
+}	
 /*----------------------------------------------------------------------------*/
 PythonBase.prototype.factoryFunc = function(bl) {
 	if (bl == undefined) {

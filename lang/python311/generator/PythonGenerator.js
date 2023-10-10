@@ -43,6 +43,7 @@ PythonGenerator.prototype.generate = function(pmodel) {
 	cmd.push('');
 	cmd.push('#******************************************************************************');
 	cmd.push('class ' + entity.getClassName() + '(' + entity.superTypesList() + '):');
+	cmd.push(entity.docstrFunc(1));
 	cmd.push('    #---------------------------------------------------------------------------');
 	cmd.push(entity.classInit(1));
 	cmd.push('#------------------------------------------------------------------------------');
@@ -79,6 +80,8 @@ PythonGenerator.prototype.generate = function(pmodel) {
 	cmd.push(entity.jsonReprFunc(1));
 	cmd.push('    #---------------------------------------------------------------------------');
 	cmd.push(entity.dmtReprFunc(1));	
+	cmd.push('    #---------------------------------------------------------------------------');
+	cmd.push(entity.fromDictFunc(1));
 	cmd.push('    #---------------------------------------------------------------------------');
 	cmd.push(entity.cloneFunc(1));
 	cmd.push('    #---------------------------------------------------------------------------');
